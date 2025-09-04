@@ -6,7 +6,10 @@ import {
   updateInvoice,
   copyInvoice,
   deleteInvoice,
-} from "../controllers/Invoicecontroller.js";
+  printInvoice,
+  emailInvoice,
+  shareInvoice,
+} from "../controllers/invoiceController.js";
 
 const router = express.Router();
 
@@ -16,5 +19,10 @@ router.get("/:id", getInvoiceById);
 router.put("/:id", updateInvoice);
 router.post("/:id/copy", copyInvoice);
 router.delete("/:id", deleteInvoice);
+
+// New
+router.get("/:id/print", printInvoice);
+router.post("/:id/email", emailInvoice);
+router.get("/:id/share", shareInvoice);
 
 export default router;
