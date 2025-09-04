@@ -7,7 +7,7 @@ const serviceSchema = new mongoose.Schema({
 
 const invoiceSchema = new mongoose.Schema({
   companyName: { type: String, required: true },
-  logo: { type: String }, // store URL or base64
+  logo: { type: String }, // store URL/base64
   clientName: { type: String, required: true },
   clientEmail: { type: String },
   services: [serviceSchema],
