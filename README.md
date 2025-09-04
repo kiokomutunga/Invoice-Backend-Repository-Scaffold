@@ -18,15 +18,6 @@ A Node.js + Express + MongoDB backend for creating and managing invoices. Featur
 * CI via GitHub Actions and linting
 
 ---
-
-## 2. Recommended repo name
-
-`invoice-backend` or `invoice-service`
-
-Add a short description on GitHub: *"API for invoice creation, management, and sharing — Node.js, Express, MongoDB".*
-
----
-
 ## 3. File structure
 
 ```
@@ -492,17 +483,3 @@ git push -u origin main
 * Add audit logs and activity timeline
 
 ---
-
-## 11. Help me implement this
-
-If you want, I can:
-
-* Generate the full repo and provide the files ready to paste
-* Create a step-by-step `git` script to initialize the repo
-* Provide additional endpoints (list invoices, search, bulk actions)
-
-Tell me which of the above you'd like me to generate next and I will produce the code files.
-
----
-
-*End of scaffold.*
