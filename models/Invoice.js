@@ -1,18 +1,24 @@
 import mongoose from "mongoose";
 
 const serviceSchema = new mongoose.Schema({
-  description: String,
-  amount: Number,
+  description: { type: String, required: true },
+  price: { type: Number, required: true },
 });
 
 const invoiceSchema = new mongoose.Schema({
-  companyName: { type: String, required: true },
-  logo: { type: String }, // store URL/base64
+  invoiceNumber: { type: String, required: true, unique: true },
+  date: { type: String, required: true },
   clientName: { type: String, required: true },
-  clientEmail: { type: String },
   services: [serviceSchema],
-  totalAmount: { type: Number, required: true },
-  status: { type: String, enum: ["Pending", "Paid"], default: "Pending" },
+  total: { type: Number, required: true },
+
+  // Payment & Footer Details
+  bankName: { type: String },
+  accountNumber: { type: String },
+  administrator: { type: String },
+  phone: { type: String },
+  email: { type: String },
+  address: { type: String },
 }, { timestamps: true });
 
 export default mongoose.model("Invoice", invoiceSchema);
