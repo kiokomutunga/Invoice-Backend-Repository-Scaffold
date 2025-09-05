@@ -2,6 +2,7 @@ import Invoice from "../models/Invoice.js";
 import { generateInvoicePDF } from "../utils/pdfGenerator.js";
 import { sendInvoiceEmail } from "../utils/emailService.js";
 import path from "path";
+import { PassThrough } from "stream";
 
 const __dirname = path.resolve();
 
@@ -51,16 +52,37 @@ export const deleteInvoice = async (req, res) => {
   res.json({ message: "Invoice deleted" });
 };
 
-// ✅ Print invoice (download PDF)
+// ✅ Preview invoice (open in browser)
+export const previewInvoice = async (req, res) => {
+  try {
+    const invoice = await Invoice.findById(req.params.id);
+    if (!invoice) return res.status(404).json({ error: "Invoice not found" });
+
+    const pdfBuffer = await generateInvoicePDF(invoice);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=invoice.pdf");
+
+    const stream = new PassThrough();
+    stream.end(pdfBuffer);
+    stream.pipe(res);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ✅ Download invoice (PDF)
 export const printInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) return res.status(404).json({ error: "Invoice not found" });
 
-    const filePath = path.join(__dirname, `invoice-${invoice._id}.pdf`);
-    await generateInvoicePDF(invoice, filePath);
+    const pdfBuffer = await generateInvoicePDF(invoice);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=invoice-${invoice._id}.pdf`);
 
-    res.download(filePath, `invoice-${invoice._id}.pdf`);
+    const stream = new PassThrough();
+    stream.end(pdfBuffer);
+    stream.pipe(res);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -72,14 +94,15 @@ export const emailInvoice = async (req, res) => {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) return res.status(404).json({ error: "Invoice not found" });
 
+    const pdfBuffer = await generateInvoicePDF(invoice);
     const filePath = path.join(__dirname, `invoice-${invoice._id}.pdf`);
-    await generateInvoicePDF(invoice, filePath);
-
+    
     await sendInvoiceEmail(
       invoice.clientEmail,
       "Your Invoice",
       "Please find attached your invoice.",
-      filePath
+      filePath,
+      pdfBuffer
     );
 
     res.json({ message: "Invoice emailed successfully" });
@@ -88,14 +111,19 @@ export const emailInvoice = async (req, res) => {
   }
 };
 
-// ✅ Share invoice (WhatsApp link)
+// ✅ Share invoice via WhatsApp
 export const shareInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) return res.status(404).json({ error: "Invoice not found" });
 
-    const message = `Hello ${invoice.clientName}, here is your invoice of total ${invoice.totalAmount}.`;
-    const whatsappLink = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const pdfUrl = `${req.protocol}://${req.get("host")}/api/invoices/${invoice._id}/download`;
+    const message = `Hello ${invoice.clientName}, here is your invoice of total KSH ${invoice.totalAmount.toLocaleString()}. Download it here: ${pdfUrl}`;
+
+    const { phone } = req.body;
+    const whatsappLink = phone
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
 
     res.json({ whatsappLink });
   } catch (err) {
