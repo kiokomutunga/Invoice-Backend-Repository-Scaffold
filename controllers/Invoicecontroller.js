@@ -6,11 +6,34 @@ import { PassThrough } from "stream";
 
 const __dirname = path.resolve();
 
+// ✅ Generate next invoice number
+const generateInvoiceNumber = async () => {
+  const lastInvoice = await Invoice.findOne().sort({ createdAt: -1 });
+  if (!lastInvoice || !lastInvoice.invoiceNumber) {
+    return "INV-00001";
+  }
+
+  const lastNumber = parseInt(lastInvoice.invoiceNumber.replace("INV-", ""), 10);
+  const nextNumber = lastNumber + 1;
+  return `INV-${String(nextNumber).padStart(5, "0")}`;
+};
+
 // ✅ Create new invoice
 export const createInvoice = async (req, res) => {
   try {
-    const invoice = new Invoice(req.body);
+    const invoiceNumber = await generateInvoiceNumber();
+
+    const invoiceData = {
+      ...req.body,
+      invoiceNumber,
+      date: req.body.date || new Date(),
+      total:
+        req.body.services?.reduce((sum, s) => sum + (Number(s.price) || 0), 0) || 0,
+    };
+
+    const invoice = new Invoice(invoiceData);
     await invoice.save();
+
     res.status(201).json(invoice);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -32,7 +55,13 @@ export const getInvoiceById = async (req, res) => {
 
 // ✅ Update invoice
 export const updateInvoice = async (req, res) => {
-  const invoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const updatedData = {
+    ...req.body,
+    total:
+      req.body.services?.reduce((sum, s) => sum + (Number(s.price) || 0), 0) || 0,
+  };
+
+  const invoice = await Invoice.findByIdAndUpdate(req.params.id, updatedData, { new: true });
   if (!invoice) return res.status(404).json({ error: "Invoice not found" });
   res.json(invoice);
 };
@@ -41,7 +70,16 @@ export const updateInvoice = async (req, res) => {
 export const copyInvoice = async (req, res) => {
   const invoice = await Invoice.findById(req.params.id);
   if (!invoice) return res.status(404).json({ error: "Invoice not found" });
-  const newInvoice = new Invoice({ ...invoice.toObject(), _id: undefined });
+
+  const invoiceNumber = await generateInvoiceNumber();
+
+  const newInvoice = new Invoice({
+    ...invoice.toObject(),
+    _id: undefined,
+    invoiceNumber,
+    date: new Date(),
+  });
+
   await newInvoice.save();
   res.status(201).json(newInvoice);
 };
@@ -52,7 +90,7 @@ export const deleteInvoice = async (req, res) => {
   res.json({ message: "Invoice deleted" });
 };
 
-// ✅ Preview invoice (open in browser)
+// ✅ Preview invoice
 export const previewInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
@@ -70,7 +108,7 @@ export const previewInvoice = async (req, res) => {
   }
 };
 
-// ✅ Download invoice (PDF)
+// ✅ Download invoice
 export const printInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
@@ -78,7 +116,7 @@ export const printInvoice = async (req, res) => {
 
     const pdfBuffer = await generateInvoicePDF(invoice);
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=invoice-${invoice._id}.pdf`);
+    res.setHeader("Content-Disposition", `attachment; filename=invoice-${invoice.invoiceNumber}.pdf`);
 
     const stream = new PassThrough();
     stream.end(pdfBuffer);
@@ -88,15 +126,15 @@ export const printInvoice = async (req, res) => {
   }
 };
 
-// ✅ Email invoice with PDF
+// ✅ Email invoice
 export const emailInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) return res.status(404).json({ error: "Invoice not found" });
 
     const pdfBuffer = await generateInvoicePDF(invoice);
-    const filePath = path.join(__dirname, `invoice-${invoice._id}.pdf`);
-    
+    const filePath = path.join(__dirname, `invoice-${invoice.invoiceNumber}.pdf`);
+
     await sendInvoiceEmail(
       invoice.clientEmail,
       "Your Invoice",
@@ -118,7 +156,7 @@ export const shareInvoice = async (req, res) => {
     if (!invoice) return res.status(404).json({ error: "Invoice not found" });
 
     const pdfUrl = `${req.protocol}://${req.get("host")}/api/invoices/${invoice._id}/download`;
-    const message = `Hello ${invoice.clientName}, here is your invoice of total KSH ${invoice.totalAmount.toLocaleString()}. Download it here: ${pdfUrl}`;
+    const message = `Hello ${invoice.clientName}, here is your invoice of total KSH ${(invoice.total || 0).toLocaleString()}. Download it here: ${pdfUrl}`;
 
     const { phone } = req.body;
     const whatsappLink = phone

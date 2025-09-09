@@ -7,9 +7,10 @@ import {
   copyInvoice,
   deleteInvoice,
   printInvoice,
+  previewInvoice,
   emailInvoice,
   shareInvoice,
-} from "../controllers/invoiceController.js";
+} from "../controllers/Invoicecontroller.js";
 
 const router = express.Router();
 
@@ -27,6 +28,9 @@ router.put("/:id", updateInvoice);
 
 // 🔹 Copy invoice
 router.post("/:id/copy", copyInvoice);
+
+// 🔹 Preview invoice PDF (same as print)
+router.get("/:id/preview", previewInvoice);
 
 // 🔹 Delete invoice
 router.delete("/:id", deleteInvoice);
