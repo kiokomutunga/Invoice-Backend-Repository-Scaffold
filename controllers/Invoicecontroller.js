@@ -18,9 +18,11 @@ const generateInvoiceNumber = async () => {
   return `INV-${String(nextNumber).padStart(5, "0")}`;
 };
 
-// ✅ Create new invoice
+// ✅ Create new invoice (with debugging)
 export const createInvoice = async (req, res) => {
   try {
+    console.log("📥 Incoming invoice payload:", req.body);
+
     const invoiceNumber = await generateInvoiceNumber();
 
     const invoiceData = {
@@ -28,17 +30,30 @@ export const createInvoice = async (req, res) => {
       invoiceNumber,
       date: req.body.date || new Date(),
       total:
-        req.body.services?.reduce((sum, s) => sum + (Number(s.price) || 0), 0) || 0,
+        req.body.services?.reduce(
+          (sum, s) => sum + (Number(s.price) || 0),
+          0
+        ) || 0,
     };
+
+    console.log("🛠 Processed invoiceData before save:", invoiceData);
 
     const invoice = new Invoice(invoiceData);
     await invoice.save();
 
+    console.log("✅ Invoice saved:", invoice);
+
     res.status(201).json(invoice);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error("❌ Error creating invoice:", err);
+
+    res.status(400).json({
+      error: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    });
   }
 };
+
 
 // ✅ Get all invoices
 export const getInvoices = async (req, res) => {
