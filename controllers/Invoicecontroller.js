@@ -2,20 +2,20 @@ import Invoice from "../models/Invoice.js";
 import { generateInvoicePDF } from "../utils/pdfGenerator.js";
 import { sendInvoiceEmail } from "../utils/emailService.js";
 import path from "path";
+import Counter from "../models/counter.js";
 import { PassThrough } from "stream";
 
 const __dirname = path.resolve();
 
 // ✅ Generate next invoice number
 const generateInvoiceNumber = async () => {
-  const lastInvoice = await Invoice.findOne().sort({ createdAt: -1 });
-  if (!lastInvoice || !lastInvoice.invoiceNumber) {
-    return "INV-00001";
-  }
+  const counter = await Counter.findOneAndUpdate(
+    { name: "invoice" },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
 
-  const lastNumber = parseInt(lastInvoice.invoiceNumber.replace("INV-", ""), 10);
-  const nextNumber = lastNumber + 1;
-  return `INV-${String(nextNumber).padStart(5, "0")}`;
+  return `INV-${String(counter.seq).padStart(5, "0")}`;
 };
 
 // ✅ Create new invoice (with debugging)
