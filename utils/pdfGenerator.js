@@ -47,12 +47,14 @@ export const generateInvoicePDF = (invoice) => {
         .text("Invoice To :", leftMargin, sectionTop);
       doc.font("Helvetica-Bold").fontSize(13).fillColor("#000")
         .text(invoice.clientName || "Unnamed Client", leftMargin, sectionTop + 18);
-        
+
       // Meta (right side)
       const metaX = pageWidth / 2 + 40;
       const dateObj = invoice.date ? new Date(invoice.date) : new Date();
       const formattedDate = dateObj.toLocaleDateString("en-GB", {
-        day: "2-digit", month: "short", year: "numeric"
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
       });
 
       doc.font("Helvetica").fontSize(10).fillColor("#000")
@@ -86,11 +88,14 @@ export const generateInvoicePDF = (invoice) => {
       const services = Array.isArray(invoice.services) ? invoice.services : [];
 
       services.forEach((s, i) => {
+        // ---------- Bullet-safe and Unicode-friendly description ----------
         const description = s.description
           ? s.description
-              .replace(/\t•/g, "•") // ensure bullet symbol formats well
-              .replace(/\n/g, "\n") // keep new lines
+              .replace(/\t/g, " ")                  // remove tabs
+              .replace(/•/g, "\u2022")              // ensure real bullet
+              .replace(/(\r\n|\n|\r)/gm, "\n")      // keep line breaks
           : "No description";
+
         const price = Number(s.price) || 0;
 
         const descHeight = doc.heightOfString(description, {
@@ -98,7 +103,7 @@ export const generateInvoicePDF = (invoice) => {
         });
         const rowHeight = Math.max(24, descHeight + 6);
 
-        // Check if row fits, else add new page
+        // Add new page if needed
         if (y + rowHeight > doc.page.height - 150) {
           doc.addPage();
           tableTop = 40;
@@ -106,13 +111,13 @@ export const generateInvoicePDF = (invoice) => {
           y = tableTop + 32;
         }
 
-        // Format price with .00
+        // Price formatting with .00
         const formattedPrice = price.toLocaleString("en-KE", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         });
 
-        // Row text
+        // Draw the row
         doc.text(String(i + 1), colNoX, y);
         doc.text(description, colDescX, y, {
           width: colPriceX - colDescX - 10,
@@ -123,7 +128,7 @@ export const generateInvoicePDF = (invoice) => {
 
         y += rowHeight;
 
-        // Divider
+        // Divider line
         doc.moveTo(leftMargin, y - 6).lineTo(pageWidth - leftMargin, y - 6)
           .strokeColor("#f0f0f0").lineWidth(0.5).stroke();
       });
@@ -145,7 +150,9 @@ export const generateInvoicePDF = (invoice) => {
       doc.roundedRect(totalBoxX, paymentsTop, totalBoxWidth, 54, 4).fill("#1E3A8A");
       doc.fillColor("#fff").font("Helvetica-Bold").fontSize(11)
         .text("GRAND TOTAL :", totalBoxX + 10, paymentsTop + 8);
-      const totalValue = Number(invoice.total) || services.reduce((s, it) => s + (Number(it.price) || 0), 0);
+      const totalValue =
+        Number(invoice.total) ||
+        services.reduce((s, it) => s + (Number(it.price) || 0), 0);
       const formattedTotal = totalValue.toLocaleString("en-KE", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -164,23 +171,31 @@ export const generateInvoicePDF = (invoice) => {
       doc.font("Helvetica-Bold").fontSize(10)
         .text("Terms and Conditions :", leftMargin, footerTextY + 20);
 
-      // Preserve bullets and new lines in terms
-      const formattedTerms = (invoice.terms || "Please send payment at least 7 days before the event.\n(Grand Total is inclusive of VAT)")
-        .replace(/\t•/g, "•")
-        .replace(/\n/g, "\n");
+      // ---------- Bullet-safe Terms ----------
+      const formattedTerms = (invoice.terms ||
+        "Please send payment at least 7 days before the event.\n(Grand Total is inclusive of VAT)")
+        .replace(/\t/g, " ")
+        .replace(/•/g, "\u2022")
+        .replace(/(\r\n|\n|\r)/gm, "\n");
+
+      const wrappedTerms = doc.splitTextToSize(
+        formattedTerms,
+        pageWidth - leftMargin * 2
+      );
 
       doc.font("Helvetica").fontSize(9)
-        .text(formattedTerms, leftMargin, footerTextY + 34, {
-          width: pageWidth - leftMargin * 2,
+        .text(wrappedTerms, leftMargin, footerTextY + 34, {
           lineGap: 2,
         });
 
+      // ---------- Signature ----------
       const signatureY = footerTextY + 80;
       doc.font("Helvetica-Bold").fontSize(11)
         .text(invoice.administrator || "Kennedy Kechula", totalBoxX, signatureY, { align: "right" });
       doc.font("Helvetica").fontSize(10)
         .text("Administrator", totalBoxX, signatureY + 18, { align: "right" });
 
+      // ---------- Contact ----------
       const contactY = doc.page.height - 70;
       doc.font("Helvetica").fontSize(9).fillColor("#000")
         .text(`Phone: ${invoice.phone || ""}`, leftMargin, contactY);
