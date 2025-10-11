@@ -86,7 +86,11 @@ export const generateInvoicePDF = (invoice) => {
       const services = Array.isArray(invoice.services) ? invoice.services : [];
 
       services.forEach((s, i) => {
-        const description = s.description || "No description";
+        const description = s.description
+          ? s.description
+              .replace(/\t•/g, "•") // ensure bullet symbol formats well
+              .replace(/\n/g, "\n") // keep new lines
+          : "No description";
         const price = Number(s.price) || 0;
 
         const descHeight = doc.heightOfString(description, {
@@ -102,7 +106,7 @@ export const generateInvoicePDF = (invoice) => {
           y = tableTop + 32;
         }
 
-        // Format price with 2 decimals
+        // Format price with .00
         const formattedPrice = price.toLocaleString("en-KE", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
@@ -110,7 +114,10 @@ export const generateInvoicePDF = (invoice) => {
 
         // Row text
         doc.text(String(i + 1), colNoX, y);
-        doc.text(description, colDescX, y, { width: colPriceX - colDescX - 10 });
+        doc.text(description, colDescX, y, {
+          width: colPriceX - colDescX - 10,
+          lineGap: 2,
+        });
         doc.text(`KSH ${formattedPrice}`, colPriceX, y, { width: 90, align: "right" });
         doc.text(`KSH ${formattedPrice}`, colTotalX, y, { width: 90, align: "right" });
 
@@ -156,8 +163,17 @@ export const generateInvoicePDF = (invoice) => {
         .text("Thank you for doing business with us!", leftMargin, footerTextY);
       doc.font("Helvetica-Bold").fontSize(10)
         .text("Terms and Conditions :", leftMargin, footerTextY + 20);
+
+      // Preserve bullets and new lines in terms
+      const formattedTerms = (invoice.terms || "Please send payment at least 7 days before the event.\n(Grand Total is inclusive of VAT)")
+        .replace(/\t•/g, "•")
+        .replace(/\n/g, "\n");
+
       doc.font("Helvetica").fontSize(9)
-        .text(invoice.terms || "Please send payment at least 7 days before the event.\n(Grand Total is inclusive of VAT)", leftMargin, footerTextY + 34);
+        .text(formattedTerms, leftMargin, footerTextY + 34, {
+          width: pageWidth - leftMargin * 2,
+          lineGap: 2,
+        });
 
       const signatureY = footerTextY + 80;
       doc.font("Helvetica-Bold").fontSize(11)
