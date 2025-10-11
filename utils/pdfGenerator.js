@@ -81,20 +81,18 @@ export const generateInvoicePDF = (invoice) => {
 
       drawTableHeader();
 
-      // Rows
+      // ---------- ROWS ----------
       let y = tableTop + 32;
       const services = Array.isArray(invoice.services) ? invoice.services : [];
 
       services.forEach((s, i) => {
-        // ---------- Safe bullet & text formatting ----------
-        const description = typeof s.description === "string"
-          ? s.description
-              .replace(/\t/g, " ")
-              .replace(/•/g, "\u2022")
-              .replace(/–/g, "\u2022")
-              .replace(/‣/g, "\u2022")
-              .replace(/(\r\n|\n|\r)/gm, "\n")
-          : String(s.description || "No description");
+        const description =
+          typeof s.description === "string"
+            ? s.description
+                .replace(/\t/g, " ")
+                .replace(/•/g, "\u2022")
+                .replace(/(\r\n|\n|\r)/gm, "\n")
+            : String(s.description || "No description");
 
         const price = Number(s.price) || 0;
         const descHeight = doc.heightOfString(description, {
@@ -102,7 +100,6 @@ export const generateInvoicePDF = (invoice) => {
         });
         const rowHeight = Math.max(24, descHeight + 6);
 
-        // Add new page if needed
         if (y + rowHeight > doc.page.height - 150) {
           doc.addPage();
           tableTop = 40;
@@ -110,13 +107,11 @@ export const generateInvoicePDF = (invoice) => {
           y = tableTop + 32;
         }
 
-        // Price formatting with .00
         const formattedPrice = price.toLocaleString("en-KE", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         });
 
-        // Draw row
         doc.text(String(i + 1), colNoX, y);
         doc.text(description, colDescX, y, {
           width: colPriceX - colDescX - 10,
@@ -126,8 +121,6 @@ export const generateInvoicePDF = (invoice) => {
         doc.text(`KSH ${formattedPrice}`, colTotalX, y, { width: 90, align: "right" });
 
         y += rowHeight;
-
-        // Divider line
         doc.moveTo(leftMargin, y - 6).lineTo(pageWidth - leftMargin, y - 6)
           .strokeColor("#f0f0f0").lineWidth(0.5).stroke();
       });
@@ -173,33 +166,29 @@ export const generateInvoicePDF = (invoice) => {
       doc.font("Helvetica-Bold").fontSize(10)
         .text("Terms and Conditions :", leftMargin, footerTextY + 20);
 
-      // ---------- Safe bullet & text in Terms ----------
+      // ---------- BULLET-SAFE TERMS ----------
       const formattedTerms = String(
         invoice.terms ||
           "Please send payment at least 7 days before the event.\n(Grand Total is inclusive of VAT)"
       )
         .replace(/\t/g, " ")
         .replace(/•/g, "\u2022")
-        .replace(/–/g, "\u2022")
-        .replace(/‣/g, "\u2022")
         .replace(/(\r\n|\n|\r)/gm, "\n");
 
-      const wrappedTerms = doc.splitTextToSize(
-        formattedTerms,
-        pageWidth - leftMargin * 2
-      );
-
       doc.font("Helvetica").fontSize(9)
-        .text(wrappedTerms, leftMargin, footerTextY + 34, { lineGap: 2 });
+        .text(formattedTerms, leftMargin, footerTextY + 34, {
+          width: pageWidth - leftMargin * 2,
+          lineGap: 2,
+        });
 
-      // ---------- Signature ----------
+      // ---------- SIGNATURE ----------
       const signatureY = footerTextY + 80;
       doc.font("Helvetica-Bold").fontSize(11)
         .text(invoice.administrator || "Kennedy Kechula", totalBoxX, signatureY, { align: "right" });
       doc.font("Helvetica").fontSize(10)
         .text("Administrator", totalBoxX, signatureY + 18, { align: "right" });
 
-      // ---------- Contact ----------
+      // ---------- CONTACT ----------
       const contactY = doc.page.height - 70;
       doc.font("Helvetica").fontSize(9).fillColor("#000")
         .text(`Phone: ${invoice.phone || ""}`, leftMargin, contactY);
@@ -208,7 +197,7 @@ export const generateInvoicePDF = (invoice) => {
 
       doc.end();
     } catch (err) {
-      console.error("❌ PDF generation failed:", err.message);
+      console.error("PDF Generation Error:", err.message);
       reject(err);
     }
   });
