@@ -17,7 +17,7 @@ export const generateInvoicePDF = (invoice) => {
       try {
         const logoPath = path.resolve("images", "elevate-logoo.png");
         doc.image(logoPath, leftMargin, 40, { width: 65, fit: [65, 50] });
-      } catch (err) {
+      } catch {
         console.warn("⚠️ Logo not found, skipping...");
       }
 
@@ -40,9 +40,8 @@ export const generateInvoicePDF = (invoice) => {
       doc.moveTo(leftMargin, 120).lineTo(pageWidth - leftMargin, 120)
         .strokeColor("#e6e6e6").lineWidth(1).stroke();
 
-      // ---------- CLIENT INFO + INVOICE META ----------
+      // ---------- CLIENT INFO + META ----------
       const sectionTop = 135;
-
       doc.font("Helvetica").fontSize(11).fillColor("#1E3A8A")
         .text("Invoice To :", leftMargin, sectionTop);
       doc.font("Helvetica-Bold").fontSize(13).fillColor("#000")
@@ -54,7 +53,7 @@ export const generateInvoicePDF = (invoice) => {
       const formattedDate = dateObj.toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "short",
-        year: "numeric"
+        year: "numeric",
       });
 
       doc.font("Helvetica").fontSize(10).fillColor("#000")
@@ -68,7 +67,6 @@ export const generateInvoicePDF = (invoice) => {
       const colPriceX = leftMargin + 330;
       const colTotalX = leftMargin + 440;
 
-      // Draw table header
       const drawTableHeader = () => {
         doc.rect(leftMargin, tableTop, pageWidth - leftMargin - 20, 24).fill("#1E3A8A");
         doc.fillColor("#fff").font("Helvetica-Bold").fontSize(10);
@@ -88,16 +86,17 @@ export const generateInvoicePDF = (invoice) => {
       const services = Array.isArray(invoice.services) ? invoice.services : [];
 
       services.forEach((s, i) => {
-        // ---------- Bullet-safe and Unicode-friendly description ----------
-        const description = s.description
+        // ---------- Safe bullet & text formatting ----------
+        const description = typeof s.description === "string"
           ? s.description
-              .replace(/\t/g, " ")                  // remove tabs
-              .replace(/•/g, "\u2022")              // ensure real bullet
-              .replace(/(\r\n|\n|\r)/gm, "\n")      // keep line breaks
-          : "No description";
+              .replace(/\t/g, " ")
+              .replace(/•/g, "\u2022")
+              .replace(/–/g, "\u2022")
+              .replace(/‣/g, "\u2022")
+              .replace(/(\r\n|\n|\r)/gm, "\n")
+          : String(s.description || "No description");
 
         const price = Number(s.price) || 0;
-
         const descHeight = doc.heightOfString(description, {
           width: colPriceX - colDescX - 10,
         });
@@ -117,7 +116,7 @@ export const generateInvoicePDF = (invoice) => {
           maximumFractionDigits: 2,
         });
 
-        // Draw the row
+        // Draw row
         doc.text(String(i + 1), colNoX, y);
         doc.text(description, colDescX, y, {
           width: colPriceX - colDescX - 10,
@@ -150,13 +149,16 @@ export const generateInvoicePDF = (invoice) => {
       doc.roundedRect(totalBoxX, paymentsTop, totalBoxWidth, 54, 4).fill("#1E3A8A");
       doc.fillColor("#fff").font("Helvetica-Bold").fontSize(11)
         .text("GRAND TOTAL :", totalBoxX + 10, paymentsTop + 8);
+
       const totalValue =
         Number(invoice.total) ||
         services.reduce((s, it) => s + (Number(it.price) || 0), 0);
+
       const formattedTotal = totalValue.toLocaleString("en-KE", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       });
+
       doc.font("Helvetica-Bold").fontSize(13)
         .text(`KSH ${formattedTotal}`, totalBoxX + 10, paymentsTop + 28);
 
@@ -171,11 +173,15 @@ export const generateInvoicePDF = (invoice) => {
       doc.font("Helvetica-Bold").fontSize(10)
         .text("Terms and Conditions :", leftMargin, footerTextY + 20);
 
-      // ---------- Bullet-safe Terms ----------
-      const formattedTerms = (invoice.terms ||
-        "Please send payment at least 7 days before the event.\n(Grand Total is inclusive of VAT)")
+      // ---------- Safe bullet & text in Terms ----------
+      const formattedTerms = String(
+        invoice.terms ||
+          "Please send payment at least 7 days before the event.\n(Grand Total is inclusive of VAT)"
+      )
         .replace(/\t/g, " ")
         .replace(/•/g, "\u2022")
+        .replace(/–/g, "\u2022")
+        .replace(/‣/g, "\u2022")
         .replace(/(\r\n|\n|\r)/gm, "\n");
 
       const wrappedTerms = doc.splitTextToSize(
@@ -184,9 +190,7 @@ export const generateInvoicePDF = (invoice) => {
       );
 
       doc.font("Helvetica").fontSize(9)
-        .text(wrappedTerms, leftMargin, footerTextY + 34, {
-          lineGap: 2,
-        });
+        .text(wrappedTerms, leftMargin, footerTextY + 34, { lineGap: 2 });
 
       // ---------- Signature ----------
       const signatureY = footerTextY + 80;
@@ -204,6 +208,7 @@ export const generateInvoicePDF = (invoice) => {
 
       doc.end();
     } catch (err) {
+      console.error("❌ PDF generation failed:", err.message);
       reject(err);
     }
   });
