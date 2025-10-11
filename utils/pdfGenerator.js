@@ -47,11 +47,7 @@ export const generateInvoicePDF = (invoice) => {
         .text("Invoice To :", leftMargin, sectionTop);
       doc.font("Helvetica-Bold").fontSize(13).fillColor("#000")
         .text(invoice.clientName || "Unnamed Client", leftMargin, sectionTop + 18);
-      if (invoice.email) {
-        doc.font("Helvetica").fontSize(10).fillColor("#000")
-          .text(`Email: ${invoice.email}`, leftMargin, sectionTop + 38);
-      }
-
+        
       // Meta (right side)
       const metaX = pageWidth / 2 + 40;
       const dateObj = invoice.date ? new Date(invoice.date) : new Date();
