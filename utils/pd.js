@@ -102,17 +102,11 @@ export const generateInvoicePDF = (invoice) => {
           y = tableTop + 32;
         }
 
-        // Format price with 2 decimals
-        const formattedPrice = price.toLocaleString("en-KE", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-
         // Row text
         doc.text(String(i + 1), colNoX, y);
         doc.text(description, colDescX, y, { width: colPriceX - colDescX - 10 });
-        doc.text(`KSH ${formattedPrice}`, colPriceX, y, { width: 90, align: "right" });
-        doc.text(`KSH ${formattedPrice}`, colTotalX, y, { width: 90, align: "right" });
+        doc.text(`KSH ${price.toLocaleString()}`, colPriceX, y, { width: 90, align: "right" });
+        doc.text(`KSH ${price.toLocaleString()}`, colTotalX, y, { width: 90, align: "right" });
 
         y += rowHeight;
 
@@ -139,12 +133,8 @@ export const generateInvoicePDF = (invoice) => {
       doc.fillColor("#fff").font("Helvetica-Bold").fontSize(11)
         .text("GRAND TOTAL :", totalBoxX + 10, paymentsTop + 8);
       const totalValue = Number(invoice.total) || services.reduce((s, it) => s + (Number(it.price) || 0), 0);
-      const formattedTotal = totalValue.toLocaleString("en-KE", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
       doc.font("Helvetica-Bold").fontSize(13)
-        .text(`KSH ${formattedTotal}`, totalBoxX + 10, paymentsTop + 28);
+        .text(`KSH ${totalValue.toLocaleString()}`, totalBoxX + 10, paymentsTop + 28);
 
       // ---------- FOOTER ----------
       const footerLineY = paymentsTop + 100;
