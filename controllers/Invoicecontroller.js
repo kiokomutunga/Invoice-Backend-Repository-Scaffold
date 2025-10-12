@@ -141,25 +141,26 @@ export const printInvoice = async (req, res) => {
   }
 };
 
-// ✅ Email invoice
 export const emailInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) return res.status(404).json({ error: "Invoice not found" });
 
+    // ✅ Generate PDF buffer
     const pdfBuffer = await generateInvoicePDF(invoice);
-    const filePath = path.join(__dirname, `invoice-${invoice.invoiceNumber}.pdf`);
 
+    // ✅ Send email to the client email (from frontend)
     await sendInvoiceEmail(
-      invoice.clientEmail,
+      invoice.clientEmail,                // Receiver email
       "Your Invoice",
       "Please find attached your invoice.",
-      filePath,
-      pdfBuffer
+      pdfBuffer,                          // The actual PDF buffer
+      invoice.invoiceNumber               // Filename part
     );
 
     res.json({ message: "Invoice emailed successfully" });
   } catch (err) {
+    console.error("❌ Email sending failed:", err);
     res.status(500).json({ error: err.message });
   }
 };
