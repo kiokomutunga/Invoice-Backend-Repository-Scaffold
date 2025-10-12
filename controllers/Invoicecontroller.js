@@ -140,23 +140,70 @@ export const printInvoice = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 export const emailInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) return res.status(404).json({ error: "Invoice not found" });
 
-    const { email } = req.body; //  from frontend input
+    const { email } = req.body; // recipient email from frontend
     if (!email) return res.status(400).json({ error: "Recipient email is required" });
 
-    // Generate the invoice PDF
+    // ✅ Generate invoice PDF
     const pdfBuffer = await generateInvoicePDF(invoice);
 
-    // Send email using Brevo (or Nodemailer, etc.)
+    // ✅ HTML email template — polished & branded
+    const htmlContent = `
+      <div style="font-family: 'Segoe UI', Roboto, sans-serif; background-color: #f4f7fb; padding: 30px;">
+        <div style="max-width: 650px; background: #ffffff; border-radius: 12px; margin: 0 auto; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #007bff, #00bcd4); padding: 25px 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Elevate Cleaning Co.</h1>
+            <p style="color: #e0f7fa; margin-top: 5px; font-size: 15px;">Professional Cleaning Services You Can Trust</p>
+          </div>
+
+          <!-- Body -->
+          <div style="padding: 30px;">
+            <h2 style="color: #333;">Hello,</h2>
+            <p style="color: #555; font-size: 16px; line-height: 1.6;">
+              Thank you for choosing <strong>Elevate Cleaning Co.</strong>!<br/>
+              Please find attached your invoice <strong>#${invoice.invoiceNumber}</strong> for the recent service provided.
+            </p>
+
+            <div style="background: #f0f4f8; border-left: 4px solid #00bcd4; border-radius: 6px; padding: 16px; margin-top: 20px;">
+              <p style="margin: 0; font-size: 15px; color: #333;">
+                <strong>Service:</strong> ${invoice.serviceName || "Cleaning Service"}<br/>
+                <strong>Total Amount:</strong> ${invoice.totalAmount} KES<br/>
+                <strong>Date Issued:</strong> ${new Date(invoice.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+
+            <p style="color: #555; font-size: 15px; line-height: 1.6; margin-top: 25px;">
+              Kindly review the attached invoice and contact us if you have any questions or clarifications.
+            </p>
+
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="mailto:info@elevatecleaningco.com"
+                 style="background: #007bff; color: #fff; text-decoration: none; padding: 12px 25px; border-radius: 8px; font-size: 16px;">
+                Contact Our Team
+              </a>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div style="background: #f8fafc; padding: 15px; text-align: center; color: #777; font-size: 13px;">
+            <p style="margin: 0;">© ${new Date().getFullYear()} Elevate Cleaning Co.<br/>
+            info@elevatecleaningco.com | Nairobi, Kenya</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // ✅ Send email
     await sendInvoiceEmail(
-      email, //  this is the user-typed email
-      "Invoice",
-      "Please find attached your invoice.",
+      email, // recipient (typed in frontend)
+      `Invoice #${invoice.invoiceNumber} - Elevate Cleaning Co.`,
+      htmlContent,
       pdfBuffer,
       invoice.invoiceNumber
     );
