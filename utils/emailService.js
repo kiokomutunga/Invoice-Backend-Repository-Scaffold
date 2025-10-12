@@ -8,7 +8,7 @@ export const sendInvoiceEmail = async (to, subject, text, pdfBuffer, invoiceNumb
     const response = await axios.post(
       "https://api.brevo.com/v3/smtp/email",
       {
-        sender: { name: "Invoice System", email: process.env.EMAIL_USER },
+        sender: { name: "Elevate Cleaning co.", email: process.env.EMAIL_USER },
         to: [{ email: to }],
         subject,
         textContent: text,
