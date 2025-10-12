@@ -169,15 +169,6 @@ export const emailInvoice = async (req, res) => {
               Thank you for choosing <strong>Elevate Cleaning Co.</strong>!<br/>
               Please find attached your invoice <strong>#${invoice.invoiceNumber}</strong> for the recent service provided.
             </p>
-
-            <div style="background: #f0f4f8; border-left: 4px solid #00bcd4; border-radius: 6px; padding: 16px; margin-top: 20px;">
-              <p style="margin: 0; font-size: 15px; color: #333;">
-                <strong>Service:</strong> ${invoice.serviceName || "Cleaning Service"}<br/>
-                <strong>Total Amount:</strong> ${invoice.totalAmount} KES<br/>
-                <strong>Date Issued:</strong> ${new Date(invoice.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-
             <p style="color: #555; font-size: 15px; line-height: 1.6; margin-top: 25px;">
               Kindly review the attached invoice and contact us if you have any questions or clarifications.
             </p>
