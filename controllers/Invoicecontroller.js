@@ -146,24 +146,28 @@ export const emailInvoice = async (req, res) => {
     const invoice = await Invoice.findById(req.params.id);
     if (!invoice) return res.status(404).json({ error: "Invoice not found" });
 
-    // ✅ Generate PDF buffer
+    const { email } = req.body; //  from frontend input
+    if (!email) return res.status(400).json({ error: "Recipient email is required" });
+
+    // Generate the invoice PDF
     const pdfBuffer = await generateInvoicePDF(invoice);
 
-    // ✅ Send email to the client email (from frontend)
+    // Send email using Brevo (or Nodemailer, etc.)
     await sendInvoiceEmail(
-      invoice.clientEmail,                // Receiver email
-      "Your Invoice",
+      email, //  this is the user-typed email
+      "Invoice",
       "Please find attached your invoice.",
-      pdfBuffer,                          // The actual PDF buffer
-      invoice.invoiceNumber               // Filename part
+      pdfBuffer,
+      invoice.invoiceNumber
     );
 
-    res.json({ message: "Invoice emailed successfully" });
+    res.json({ message: `Invoice emailed successfully to ${email}` });
   } catch (err) {
-    console.error("❌ Email sending failed:", err);
-    res.status(500).json({ error: err.message });
+    console.error("❌ Error sending email:", err);
+    res.status(500).json({ error: "Failed to send email" });
   }
 };
+
 
 // ✅ Share invoice via WhatsApp
 export const shareInvoice = async (req, res) => {

@@ -1,35 +1,38 @@
-import nodemailer from "nodemailer";
+import axios from "axios";
 
 export const sendInvoiceEmail = async (to, subject, text, pdfBuffer, invoiceNumber) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true, // true for port 465, false for 587
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+    // Convert the PDF buffer to base64 for the API
+    const pdfBase64 = pdfBuffer.toString("base64");
+
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: { name: "Invoice System", email: process.env.EMAIL_USER },
+        to: [{ email: to }],
+        subject,
+        textContent: text,
+        attachment: [
+          {
+            content: pdfBase64,
+            name: `invoice-${invoiceNumber}.pdf`,
+          },
+        ],
       },
-      connectionTimeout: 20000, // 20s timeout
-    });
-
-    const mailOptions = {
-      from: `"Invoice System" <${process.env.EMAIL_USER}>`, // sender from .env
-      to, // receiver from frontend input
-      subject,
-      text,
-      attachments: [
-        {
-          filename: `invoice-${invoiceNumber}.pdf`,
-          content: pdfBuffer,
-          contentType: "application/pdf",
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
         },
-      ],
-    };
+      }
+    );
 
-    await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent successfully:", response.data);
   } catch (error) {
-    console.error("❌ Email sending failed:", error);
-    throw error;
+    console.error(
+      "❌ Email sending failed:",
+      error.response?.data || error.message
+    );
+    throw new Error(error.response?.data?.message || error.message);
   }
 };
