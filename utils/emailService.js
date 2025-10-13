@@ -27,7 +27,7 @@ export const sendInvoiceEmail = async (to, subject, text, pdfBuffer, invoiceNumb
       }
     );
 
-    console.log("✅ Email sent successfully:", response.data);
+    console.log("✅ Email sent successfully please if you dont see it in your inbox confirm in the spam folder:", response.data);
   } catch (error) {
     console.error(
       "❌ Email sending failed:",
