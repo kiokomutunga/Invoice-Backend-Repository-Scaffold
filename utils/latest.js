@@ -12,7 +12,8 @@ export const generateInvoicePDF = (invoice) => {
 
       const pageWidth = doc.page.width;
       const leftMargin = 40;
-      let pageCount = 1;
+      let pageCount = 1; // Track pages
+      let currentPage = 1;
 
       // ---------- HEADER ----------
       const drawHeader = (pageNum) => {
@@ -48,7 +49,7 @@ export const generateInvoicePDF = (invoice) => {
         doc.font("Helvetica-Bold").fontSize(13).fillColor("#000")
           .text(invoice.clientName || "Unnamed Client", leftMargin, sectionTop + 18);
 
-        // Meta info
+        // Meta (right side)
         const metaX = pageWidth / 2 + 40;
         const dateObj = invoice.date ? new Date(invoice.date) : new Date();
         const formattedDate = dateObj.toLocaleDateString("en-GB", {
@@ -105,6 +106,7 @@ export const generateInvoicePDF = (invoice) => {
 
           doc.addPage();
           pageCount++;
+          currentPage++;
           tableTop = drawHeader(pageCount);
           drawTableHeader(tableTop);
           y = tableTop + 32;
@@ -183,18 +185,22 @@ export const generateInvoicePDF = (invoice) => {
           lineGap: 2,
         });
 
-      // ---------- SIGNATURE & CONTACT ----------
-      const signatureY = doc.page.height - 140;
-      doc.font("Helvetica-Bold").fontSize(11)
-        .text(invoice.administrator || "Kennedy Kechula", pageWidth - 200, signatureY, { align: "right" });
-      doc.font("Helvetica").fontSize(10)
-        .text("Administrator", pageWidth - 200, signatureY + 16, { align: "right" });
+      // ---------- SIGNATURE & CONTACT (LAST PAGE ONLY) ----------
+      const isLastPage = doc.page === doc.bufferedPageRange().count - 1;
 
-      const contactY = doc.page.height - 60;
-      doc.font("Helvetica").fontSize(9).fillColor("#000")
-        .text(`Phone: ${invoice.phone || ""}`, leftMargin, contactY);
-      doc.text(`Email: ${invoice.email || ""}`, leftMargin + 180, contactY);
-      doc.text(`Address: ${invoice.address || ""}`, leftMargin + 340, contactY);
+      if (isLastPage) {
+        const signatureY = footerTextY + 120;
+        doc.font("Helvetica-Bold").fontSize(11)
+          .text(invoice.administrator || "Kennedy Kechula", totalBoxX, signatureY, { align: "right" });
+        doc.font("Helvetica").fontSize(10)
+          .text("Administrator", totalBoxX, signatureY + 16, { align: "right" });
+
+        const contactY = doc.page.height - 60;
+        doc.font("Helvetica").fontSize(9).fillColor("#000")
+          .text(`Phone: ${invoice.phone || ""}`, leftMargin, contactY);
+        doc.text(`Email: ${invoice.email || ""}`, leftMargin + 180, contactY);
+        doc.text(`Address: ${invoice.address || ""}`, leftMargin + 340, contactY);
+      }
 
       doc.end();
     } catch (err) {
