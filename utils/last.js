@@ -13,7 +13,7 @@ export const generateInvoicePDF = (invoice) => {
       const pageWidth = doc.page.width;
       const leftMargin = 40;
 
-      // ---------- LOGO + COMPANY ----------
+      // ---------- LOGO + 
       try {
         const logoPath = path.resolve("images", "elevate-logoo.png");
         doc.image(logoPath, leftMargin, 40, { width: 65, fit: [65, 50] });
