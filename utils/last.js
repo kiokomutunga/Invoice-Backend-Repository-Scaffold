@@ -169,7 +169,7 @@ export const generateInvoicePDF = (invoice) => {
       // ---------- BULLET-SAFE TERMS ----------
       const formattedTerms = String(
         invoice.terms ||
-          "Please send payment at least 7 days before the event.\n(Grand Total is inclusive of VAT)"
+          "Please send payment at least 7 days before the event.\n(Grand Total is exclusive of VAT)"
       )
         .replace(/\t/g, " ")
         .replace(/•/g, "\u2022")
