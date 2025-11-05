@@ -171,7 +171,7 @@ export const generateInvoicePDF = (invoice) => {
 
       const formattedTerms = String(
         invoice.terms ||
-        "Grand Total is exclusive of VAT"
+        "A down payment of at least half the grand total should be paid before work commences\n(Grand Total is exclusive of VAT)"
       )
         .replace(/\t/g, " ")
         .replace(/•/g, "\u2022")
