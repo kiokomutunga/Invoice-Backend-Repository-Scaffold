@@ -1,4 +1,4 @@
-// utils/pdfGenerator.js
+
 import PDFDocument from "pdfkit";
 import path from "path";
 
@@ -13,8 +13,9 @@ export const generateInvoicePDF = (invoice) => {
       const pageWidth = doc.page.width;
       const leftMargin = 40;
       let pageCount = 1;
+    
 
-      // ---------- HEADER ----------
+      // HEADER
       const drawHeader = (pageNum) => {
         try {
           const logoPath = path.resolve("images", "elevate-logoo.png");
@@ -64,7 +65,7 @@ export const generateInvoicePDF = (invoice) => {
         return sectionTop + 85; // table starts here
       };
 
-      // ---------- TABLE HEADER ----------
+      //  TABLE HEADER 
       const drawTableHeader = (tableTop) => {
         doc.rect(leftMargin, tableTop, pageWidth - leftMargin - 20, 24).fill("#1E3A8A");
         doc.fillColor("#fff").font("Helvetica-Bold").fontSize(10);
@@ -77,7 +78,7 @@ export const generateInvoicePDF = (invoice) => {
           .strokeColor("#cccccc").lineWidth(0.5).stroke();
       };
 
-      // ---------- INITIAL PAGE ----------
+      // INITIAL PAGE 
       let tableTop = drawHeader(pageCount);
       drawTableHeader(tableTop);
 
@@ -126,7 +127,7 @@ export const generateInvoicePDF = (invoice) => {
           .strokeColor("#f0f0f0").lineWidth(0.5).stroke();
       });
 
-      // ---------- PAYMENT + TOTAL ----------
+      //  PAYMENT + TOTAL 
       const paymentsTop = y + 20;
       const paymentBoxWidth = 260;
       const totalBoxX = leftMargin + 300;
@@ -155,7 +156,7 @@ export const generateInvoicePDF = (invoice) => {
       doc.font("Helvetica-Bold").fontSize(13)
         .text(`KSH ${formattedTotal}`, totalBoxX + 10, paymentsTop + 28);
 
-      // ---------- FOOTER ----------
+      //  FOOTER 
       const footerLineY = paymentsTop + 100;
       doc.moveTo(leftMargin, footerLineY)
         .lineTo(pageWidth - leftMargin, footerLineY)
@@ -171,7 +172,7 @@ export const generateInvoicePDF = (invoice) => {
 
       const formattedTerms = String(
         invoice.terms ||
-        "A down payment of at least half the grand total should be paid before work commences\n(Grand Total is exclusive of VAT)"
+        "Please send payment at least 7 days before the event\n(Grand Total is inclusive of VAT)"
       )
         .replace(/\t/g, " ")
         .replace(/•/g, "\u2022")
@@ -183,7 +184,7 @@ export const generateInvoicePDF = (invoice) => {
           lineGap: 2,
         });
 
-      // ---------- SIGNATURE & CONTACT ----------
+      //  SIGNATURE & CONTACT 
       const signatureY = doc.page.height - 140;
       doc.font("Helvetica-Bold").fontSize(11)
         .text(invoice.administrator || "Kennedy Kechula", pageWidth - 200, signatureY, { align: "right" });
