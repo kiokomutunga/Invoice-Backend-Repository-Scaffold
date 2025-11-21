@@ -7,7 +7,7 @@ import { PassThrough } from "stream";
 
 const __dirname = path.resolve();
 
-// ✅ Generate next invoice number
+// Generate next invoice number
 const generateInvoiceNumber = async () => {
   const counter = await Counter.findOneAndUpdate(
     { name: "invoice" },
@@ -18,10 +18,10 @@ const generateInvoiceNumber = async () => {
   return `INV-${String(counter.seq).padStart(5, "0")}`;
 };
 
-// ✅ Create new invoice (with debugging)
+//  Create new invoice
 export const createInvoice = async (req, res) => {
   try {
-    console.log("📥 Incoming invoice payload:", req.body);
+    console.log("Incoming invoice payload:", req.body);
 
     const invoiceNumber = await generateInvoiceNumber();
 
@@ -41,7 +41,7 @@ export const createInvoice = async (req, res) => {
     const invoice = new Invoice(invoiceData);
     await invoice.save();
 
-    console.log("✅ Invoice saved:", invoice);
+    console.log("Invoice saved:", invoice);
 
     res.status(201).json(invoice);
   } catch (err) {
@@ -55,20 +55,20 @@ export const createInvoice = async (req, res) => {
 };
 
 
-// ✅ Get all invoices
+// Get all invoices
 export const getInvoices = async (req, res) => {
   const invoices = await Invoice.find();
   res.json(invoices);
 };
 
-// ✅ Get single invoice
+// Get single invoice
 export const getInvoiceById = async (req, res) => {
   const invoice = await Invoice.findById(req.params.id);
   if (!invoice) return res.status(404).json({ error: "Invoice not found" });
   res.json(invoice);
 };
 
-// ✅ Update invoice
+// Update invoice
 export const updateInvoice = async (req, res) => {
   const updatedData = {
     ...req.body,
@@ -81,7 +81,7 @@ export const updateInvoice = async (req, res) => {
   res.json(invoice);
 };
 
-// ✅ Copy invoice
+// Copy invoice
 export const copyInvoice = async (req, res) => {
   const invoice = await Invoice.findById(req.params.id);
   if (!invoice) return res.status(404).json({ error: "Invoice not found" });
@@ -99,13 +99,13 @@ export const copyInvoice = async (req, res) => {
   res.status(201).json(newInvoice);
 };
 
-// ✅ Delete invoice
+// Delete invoice
 export const deleteInvoice = async (req, res) => {
   await Invoice.findByIdAndDelete(req.params.id);
   res.json({ message: "Invoice deleted" });
 };
 
-// ✅ Preview invoice
+//  Preview invoice
 export const previewInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
@@ -123,7 +123,7 @@ export const previewInvoice = async (req, res) => {
   }
 };
 
-// ✅ Download invoice
+// Download invoice
 export const printInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
@@ -148,10 +148,10 @@ export const emailInvoice = async (req, res) => {
     const { email } = req.body; // recipient email from frontend
     if (!email) return res.status(400).json({ error: "Recipient email is required" });
 
-    // ✅ Generate invoice PDF
+    // Generate invoice PDF
     const pdfBuffer = await generateInvoicePDF(invoice);
 
-    // ✅ HTML email template — polished & branded
+    // HTML email template — polished & branded
     const htmlContent = `
       <div style="font-family: 'Segoe UI', Roboto, sans-serif; background-color: #f4f7fb; padding: 30px;">
         <div style="max-width: 650px; background: #ffffff; border-radius: 12px; margin: 0 auto; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
@@ -190,7 +190,7 @@ export const emailInvoice = async (req, res) => {
       </div>
     `;
 
-    // ✅ Send email
+    // Send email
     await sendInvoiceEmail(
       email, // recipient (typed in frontend)
       `Invoice #${invoice.invoiceNumber} - Elevate Cleaning Co.`,
@@ -207,7 +207,7 @@ export const emailInvoice = async (req, res) => {
 };
 
 
-// ✅ Share invoice via WhatsApp
+// Share invoice via WhatsApp
 export const shareInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);

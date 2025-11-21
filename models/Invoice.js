@@ -18,6 +18,7 @@ const invoiceSchema = new mongoose.Schema(
     // Payment & Footer Details
     bankName: { type: String },
     accountNumber: { type: String },
+    accountName: {type: String},
     administrator: { type: String },
     phone: { type: String },
     email: { type: String },
