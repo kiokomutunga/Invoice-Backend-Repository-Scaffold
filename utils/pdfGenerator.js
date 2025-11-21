@@ -141,7 +141,7 @@ export const generateInvoicePDF = (invoice) => {
         .text("PAYMENT METHOD :", leftMargin + 10, paymentsTop + 8);
       doc.font("Helvetica").fontSize(10).fillColor("#000")
         .text(invoice.bankName || "COOPERATIVE BANK", leftMargin + 10, paymentsTop + 26);
-      doc.text("Account Name: WESKAFLOW LIMITED ", leftMargin + 10, paymentsTop + 40);
+      doc.text("Account Name: WESKAFLO LIMITED ", leftMargin + 10, paymentsTop + 40);
       doc.text("Account Number: ",invoice.accountNumber || "01108111046300", leftMargin + 10, paymentsTop + 40);
 
       doc.roundedRect(totalBoxX, paymentsTop, totalBoxWidth, 54, 4).fill("#1E3A8A");
