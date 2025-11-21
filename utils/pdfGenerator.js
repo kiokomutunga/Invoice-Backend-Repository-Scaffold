@@ -131,7 +131,7 @@ export const generateInvoicePDF = (invoice) => {
 
       //  PAYMENT + TOTAL 
       const paymentsTop = y + 20;
-      const paymentBoxWidth = 260;
+      const paymentBoxWidth = 280;
       const totalBoxX = leftMargin + 300;
       const totalBoxWidth = pageWidth - leftMargin - totalBoxX;
 
