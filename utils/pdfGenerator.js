@@ -29,7 +29,7 @@ export const generateInvoicePDF = (invoice) => {
         doc.fontSize(10).fillColor("#1E3A8A")
           .text("Cleaning Co.", leftMargin + 80, 70);
         doc.fontSize(12).fillColor("#1E3A8A")
-          .text("Weskaflo Ltd.", leftMargin + 80, 90);
+          .text("(Weskaflo Ltd).", leftMargin + 80, 90);
 
         // Invoice badge
         const badgeWidth = 120;
