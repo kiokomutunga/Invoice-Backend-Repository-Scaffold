@@ -29,7 +29,7 @@ export const generateInvoicePDF = (invoice) => {
         doc.fontSize(12).fillColor("#1E3A8A")
           .text("Cleaning Co.", leftMargin + 80, 70);
         doc.fontSize(12).fillColor("#1E3A8A")
-          .text("Weskaflo Ltd.", leftMargin + 80, 70);
+          .text("Weskaflo Ltd.", leftMargin + 80, 90);
 
         // Invoice badge
         const badgeWidth = 120;
@@ -174,7 +174,8 @@ export const generateInvoicePDF = (invoice) => {
 
       const formattedTerms = String(
         invoice.terms ||
-        "Please send payment at least 7 days before the event\n(Grand Total is inclusive of VAT)"
+        //"Please send payment at least 7 days before the event\n(Grand Total is inclusive of VAT)"
+        "Grand Total is inclusive of VAT"
       )
         .replace(/\t/g, " ")
         .replace(/•/g, "\u2022")
