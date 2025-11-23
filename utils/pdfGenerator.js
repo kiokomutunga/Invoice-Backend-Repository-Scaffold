@@ -147,7 +147,7 @@ export const generateInvoicePDF = (invoice) => {
       doc.roundedRect(totalBoxX, paymentsTop, totalBoxWidth, 54, 4).fill("#1E3A8A");
       doc.fillColor("#fff").font("Helvetica-Bold").fontSize(11)
         .text("GRAND TOTAL :", totalBoxX + 10, paymentsTop + 8);
-
+ 
       const totalValue =
         Number(invoice.total) ||
         services.reduce((s, it) => s + (Number(it.price) || 0), 0);
