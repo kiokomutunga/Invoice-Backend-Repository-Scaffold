@@ -36,7 +36,7 @@ export const createInvoice = async (req, res) => {
         ) || 0,
     };
 
-    console.log("🛠 Processed invoiceData before save:", invoiceData);
+    console.log("Processed invoiceData before save:", invoiceData);
 
     const invoice = new Invoice(invoiceData);
     await invoice.save();
@@ -45,7 +45,7 @@ export const createInvoice = async (req, res) => {
 
     res.status(201).json(invoice);
   } catch (err) {
-    console.error("❌ Error creating invoice:", err);
+    console.error(" Error creating invoice:", err);
 
     res.status(400).json({
       error: err.message,
