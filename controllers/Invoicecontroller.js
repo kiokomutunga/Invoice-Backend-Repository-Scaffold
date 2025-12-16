@@ -201,7 +201,7 @@ export const emailInvoice = async (req, res) => {
 
     res.json({ message: `Invoice emailed successfully to ${email}` });
   } catch (err) {
-    console.error("❌ Error sending email:", err);
+    console.error(" Error sending email:", err);
     res.status(500).json({ error: "Failed to send email" });
   }
 };
