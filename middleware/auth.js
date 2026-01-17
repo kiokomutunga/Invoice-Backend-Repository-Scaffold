@@ -1,8 +1,8 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
-//  Authenticate user with JWT
-exports.authenticateUser = async (req, res, next) => {
+// Authenticate user with JWT
+export const authenticateUser = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -19,15 +19,15 @@ exports.authenticateUser = async (req, res, next) => {
       return res.status(401).json({ message: "User not found" });
     }
 
-    req.user = user; // attach user to request
+    req.user = user;
     next();
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
 
-//Require user to be an admin
-exports.requireAdmin = (req, res, next) => {
+// Require user to be an admin
+export const requireAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({ message: "Admin access required" });
   }
