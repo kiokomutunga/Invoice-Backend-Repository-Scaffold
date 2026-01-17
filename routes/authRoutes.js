@@ -1,5 +1,5 @@
-const router = require("express").Router();
-const {
+import express from "express";
+import {
   register,
   login,
   verifyOtp,
@@ -10,9 +10,12 @@ const {
   registerAdmin,
   googleLogin,
   resendOtp
-} = require("../controllers/authController");
+} from "../controllers/authController.js";
 
-const { authenticateUser } = require("../middleware/auth");
+import { authenticateUser } from "../middleware/auth.js";
+
+const router = express.Router();
+
 router.post("/admin/register", registerAdmin);
 router.post("/register", register);
 router.post("/verify-otp", verifyOtp);
@@ -24,7 +27,4 @@ router.post("/google-login", googleLogin);
 router.get("/profile", authenticateUser, getProfile);
 router.get("/resendOtp", resendOtp);
 
-
-
-
-module.exports = router;
+export default router;
