@@ -25,9 +25,9 @@ const generateAndSendOtp = async (email, subject) => {
   });
 };
 
-// ===================== AUTH CONTROLLERS =====================
+//AUTH CONTROLLERS 
 
-// Register
+// Register new user
 export const register = async (req, res) => {
   try {
     const { name, email, phone, password } = req.body;
@@ -47,7 +47,7 @@ export const register = async (req, res) => {
   }
 };
 
-// Admin Register
+// Admin Register new registration
 export const registerAdmin = async (req, res) => {
   try {
     const { name, email, phone, password, secretCode } = req.body;
@@ -77,7 +77,7 @@ export const registerAdmin = async (req, res) => {
   }
 };
 
-// Verify OTP
+// Verify OTP for new sending and registration
 export const verifyOtp = async (req, res) => {
   try {
     const { email, code } = req.body;
@@ -96,7 +96,7 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-// Resend OTP
+// Resend OTP option for resending otps
 export const resendOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -115,7 +115,7 @@ export const resendOtp = async (req, res) => {
   }
 };
 
-// Login
+// Login with email and password 
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -141,7 +141,7 @@ export const login = async (req, res) => {
   }
 };
 
-// Forgot Password
+// Forgot Password to change password
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -156,7 +156,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-// Reset Password
+// Reset Password in need of changing password
 export const resetPassword = async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
@@ -229,7 +229,7 @@ export const googleLogin = async (req, res) => {
   }
 };
 
-// Profile
+// Profile fetch Uer details
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");

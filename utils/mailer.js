@@ -8,7 +8,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Named export (matches your import)
 export const sendEmail = ({ to, subject, text, html }) => {
   return transporter.sendMail({
     from: process.env.EMAIL_USER,
@@ -19,7 +18,6 @@ export const sendEmail = ({ to, subject, text, html }) => {
   });
 };
 
-// Optional debug logs (safe)
 console.log("Email user:", process.env.EMAIL_USER);
 console.log(
   "Email pass:",
