@@ -229,7 +229,7 @@ export const googleLogin = async (req, res) => {
   }
 };
 
-// Profile fetch Uer details
+// Profile fetch User details
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");

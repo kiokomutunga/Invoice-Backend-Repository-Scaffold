@@ -25,7 +25,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
   }
 };
 
-// Debug logs (safe)
+
 console.log("Email user:", process.env.EMAIL_USER);
 console.log(
   "Email pass:",
