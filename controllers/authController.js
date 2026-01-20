@@ -99,7 +99,8 @@ export const verifyOtp = async (req, res) => {
 // Resend OTP option for resending otps
 export const resendOtp = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email } = req.query;
+    //req.body
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -110,9 +111,10 @@ export const resendOtp = async (req, res) => {
     await generateAndSendOtp(email, "Resend OTP");
 
     res.json({ message: "OTP resent" });
-  } catch {
-    res.status(500).json({ error: "Failed to resend OTP" });
-  }
+  } catch (error) {
+  console.error(error);
+  res.status(500).json({ error: "Failed to resend OTP" });
+}
 };
 
 // Login with email and password 
