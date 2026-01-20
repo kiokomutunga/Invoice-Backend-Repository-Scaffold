@@ -10,20 +10,32 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Generate & send OTP
 const generateAndSendOtp = async (email, subject) => {
+  // Generate OTP
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
+  // Save or update OTP in DB
   await Otp.findOneAndUpdate(
     { email },
     { code: otpCode, expiresAt: Date.now() + 10 * 60 * 1000 },
     { upsert: true }
   );
 
-  await sendEmail({
-    to: email,
-    subject,
-    html: `<p>Your OTP is <b>${otpCode}</b></p>`
-  });
+  // Send email safely
+  try {
+    await sendEmail({
+      to: email,
+      subject,
+      html: `<p>Your OTP is <b>${otpCode}</b></p>`
+    });
+    console.log(`OTP sent to ${email}: ${otpCode}`);
+  } catch (error) {
+    console.error("Failed to send OTP email:", error);
+    throw new Error("Could not send OTP email");
+  }
+
+  return otpCode;
 };
+
 
 //AUTH CONTROLLERS 
 
@@ -99,8 +111,7 @@ export const verifyOtp = async (req, res) => {
 // Resend OTP option for resending otps
 export const resendOtp = async (req, res) => {
   try {
-    const { email } = req.query;
-    //req.body
+    const { email } = req.query; // since you're using GET
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -112,10 +123,11 @@ export const resendOtp = async (req, res) => {
 
     res.json({ message: "OTP resent" });
   } catch (error) {
-  console.error(error);
-  res.status(500).json({ error: "Failed to resend OTP" });
-}
+    console.error("Resend OTP Error:", error); // <--- log full error
+    res.status(500).json({ error: "Failed to resend OTP" });
+  }
 };
+
 
 // Login with email and password 
 export const login = async (req, res) => {
