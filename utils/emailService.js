@@ -1,38 +1,51 @@
-import axios from "axios";
+import sgMail from "@sendgrid/mail";
 
-export const sendInvoiceEmail = async (to, subject, text, pdfBuffer, invoiceNumber) => {
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+export const sendInvoiceEmail = async (
+  to,
+  subject,
+  text,
+  pdfBuffer,
+  invoiceNumber
+) => {
   try {
-    // Convert the PDF buffer to base64 for the API
+    // Convert PDF buffer to Base64
     const pdfBase64 = pdfBuffer.toString("base64");
 
-    const response = await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
-      {
-        sender: { name: "Elevate Cleaning co.", email: process.env.EMAIL_USER },
-        to: [{ email: to }],
-        subject,
-        textContent: text,
-        attachment: [
-          {
-            content: pdfBase64,
-            name: `invoice-${invoiceNumber}.pdf`,
-          },
-        ],
+    await sgMail.send({
+      to,
+      from: {
+        email: process.env.EMAIL_FROM,
+        name: "Elevate Cleaning Co.",
       },
-      {
-        headers: {
-          "api-key": process.env.BREVO_API_KEY,
-          "Content-Type": "application/json",
+      subject,
+      text,
+      html: `
+        <p>${text}</p>
+        <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
+        <p>Please find your invoice attached.</p>
+      `,
+      attachments: [
+        {
+          content: pdfBase64,
+          filename: `invoice-${invoiceNumber}.pdf`,
+          type: "application/pdf",
+          disposition: "attachment",
         },
-      }
-    );
+      ],
+    });
 
-    console.log(" Email sent successfully please if you dont see it in your inbox confirm in the spam folder:", response.data);
+    console.log(
+      "Invoice email sent successfully. If not in inbox, check spam."
+    );
   } catch (error) {
     console.error(
-      " Email sending failed:",
-      error.response?.data || error.message
+      "SendGrid email sending failed:",
+      error.response?.body || error.message
     );
-    throw new Error(error.response?.data?.message || error.message);
+    throw new Error(
+      error.response?.body?.errors?.[0]?.message || error.message
+    );
   }
 };
