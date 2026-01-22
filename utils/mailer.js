@@ -1,29 +1,41 @@
-import sgMail from "@sendgrid/mail";
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+import axios from "axios";
 
 export const sendEmail = async ({ to, subject, text, html }) => {
   try {
-    await sgMail.send({
-      to,
-      from: {
-        email: process.env.EMAIL_FROM,
-        name: "Invoice System",
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "Invoice System",
+          email: process.env.EMAIL_FROM,
+        },
+        to: [{ email: to }],
+        subject,
+        textContent: text,
+        htmlContent: html,
       },
-      subject,
-      text,
-      html,
-    });
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+        timeout: 15000,
+      }
+    );
 
-    console.log(`Email sent to ${to}`);
+    console.log(`Email sent to ${to}`, response.data);
+    return response.data;
   } catch (error) {
     console.error(
-      "SendGrid Email Error:",
-      error.response?.body || error.message
+      "Brevo Email Error:",
+      error.response?.data || error.message
     );
-    throw error;
+    throw new Error("Failed to send email");
   }
 };
 
-console.log("SendGrid API Key:", process.env.SENDGRID_API_KEY ? "Loaded" : "Not Loaded");
+console.log(
+  "Brevo API Key:",
+  process.env.BREVO_API_KEY ? "Loaded" : "Not Loaded"
+);
 console.log("Email from:", process.env.EMAIL_FROM);

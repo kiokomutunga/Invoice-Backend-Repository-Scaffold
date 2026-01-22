@@ -1,6 +1,4 @@
-import sgMail from "@sendgrid/mail";
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+import axios from "axios";
 
 export const sendInvoiceEmail = async (
   to,
@@ -13,39 +11,48 @@ export const sendInvoiceEmail = async (
     // Convert PDF buffer to Base64
     const pdfBase64 = pdfBuffer.toString("base64");
 
-    await sgMail.send({
-      to,
-      from: {
-        email: process.env.EMAIL_FROM,
-        name: "Elevate Cleaning Co.",
-      },
-      subject,
-      text,
-      html: `
-        <p>${text}</p>
-        <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
-        <p>Please find your invoice attached.</p>
-      `,
-      attachments: [
-        {
-          content: pdfBase64,
-          filename: `invoice-${invoiceNumber}.pdf`,
-          type: "application/pdf",
-          disposition: "attachment",
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "Elevate Cleaning Co.",
+          email: process.env.EMAIL_FROM,
         },
-      ],
-    });
+        to: [{ email: to }],
+        subject,
+        textContent: text,
+        htmlContent: `
+          <p>${text}</p>
+          <p><strong>Invoice Number:</strong> ${invoiceNumber}</p>
+          <p>Please find your invoice attached.</p>
+        `,
+        attachment: [
+          {
+            content: pdfBase64,
+            name: `invoice-${invoiceNumber}.pdf`,
+          },
+        ],
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+        timeout: 15000,
+      }
+    );
 
     console.log(
-      "Invoice email sent successfully. If not in inbox, check spam."
+      "Invoice email sent successfully via Brevo. Check spam if not in inbox.",
+      response.data
     );
   } catch (error) {
     console.error(
-      "SendGrid email sending failed:",
-      error.response?.body || error.message
+      "Brevo email sending failed:",
+      error.response?.data || error.message
     );
     throw new Error(
-      error.response?.body?.errors?.[0]?.message || error.message
+      error.response?.data?.message || "Failed to send invoice email"
     );
   }
 };
