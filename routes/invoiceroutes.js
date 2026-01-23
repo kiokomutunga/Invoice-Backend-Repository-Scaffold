@@ -11,6 +11,7 @@ import {
   emailInvoice,
   shareInvoice,
 } from "../controllers/Invoicecontroller.js";
+import { requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ const router = express.Router();
 router.post("/", createInvoice);
 
 // Get all invoices
-router.get("/", getInvoices);
+router.get("/", getInvoices, requireAdmin);
 
 // Get single invoice by ID
 router.get("/:id", getInvoiceById);

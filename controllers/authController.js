@@ -25,9 +25,9 @@ const generateAndSendOtp = async (email, subject) => {
     await sendEmail({
       to: email,
       subject,
-      html: `<p>Your OTP is <b>${otpCode}</b></p>`
+      html: `<p>Your OTP is  <b>${otpCode} </b>
+      kindly do not share this code for security purposes</p>`
     });
-    console.log(`OTP sent to ${email}: ${otpCode}`);
   } catch (error) {
     console.error("Failed to send OTP email:", error);
     throw new Error("Could not send OTP email");
@@ -123,7 +123,7 @@ export const resendOtp = async (req, res) => {
 
     res.json({ message: "OTP resent" });
   } catch (error) {
-    console.error("Resend OTP Error:", error); // <--- log full error
+    console.error("Resend OTP Error:", error);
     res.status(500).json({ error: "Failed to resend OTP" });
   }
 };
