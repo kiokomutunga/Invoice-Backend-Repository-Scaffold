@@ -11,38 +11,39 @@ import {
   emailInvoice,
   shareInvoice,
 } from "../controllers/Invoicecontroller.js";
-import { requireAdmin } from "../middleware/auth.js";
+
+import { authenticateUser, requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Create new invoice
-router.post("/", createInvoice);
+// Create invoice (logged in users)
+router.post("/", authenticateUser, createInvoice);
 
-// Get all invoices
-router.get("/", getInvoices, requireAdmin);
+// Get all invoices (ADMIN ONLY)
+router.get("/", authenticateUser, requireAdmin, getInvoices);
 
-// Get single invoice by ID
-router.get("/:id", getInvoiceById);
+// Get invoice by ID
+router.get("/:id", authenticateUser, getInvoiceById);
 
 // Update invoice
-router.put("/:id", updateInvoice);
+router.put("/:id", authenticateUser, updateInvoice);
 
 // Copy invoice
-router.post("/:id/copy", copyInvoice);
+router.post("/:id/copy", authenticateUser, copyInvoice);
 
-// Preview invoice PDF (same as print)
-router.get("/:id/preview", previewInvoice);
+// Preview invoice PDF
+router.get("/:id/preview", authenticateUser, previewInvoice);
 
-// Delete invoice
-router.delete("/:id", deleteInvoice);
+// Delete invoice (ADMIN ONLY)
+router.delete("/:id", authenticateUser, requireAdmin, deleteInvoice);
 
-//  Download invoice PDF
-router.get("/:id/print", printInvoice);
+// Print invoice
+router.get("/:id/print", authenticateUser, printInvoice);
 
-//  Email invoice (asks for clientEmail in body if not stored)
-router.post("/:id/email", emailInvoice);
+// Email invoice
+router.post("/:id/email", authenticateUser, emailInvoice);
 
-//  Share invoice (WhatsApp link)
-router.get("/:id/share", shareInvoice);
+// Share invoice
+router.get("/:id/share", authenticateUser, shareInvoice);
 
 export default router;
