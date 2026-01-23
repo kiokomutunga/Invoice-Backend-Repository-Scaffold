@@ -36,9 +36,6 @@ const generateAndSendOtp = async (email, subject) => {
   return otpCode;
 };
 
-
-//AUTH CONTROLLERS 
-
 // Register new user
 export const register = async (req, res) => {
   try {
@@ -59,7 +56,6 @@ export const register = async (req, res) => {
   }
 };
 
-// Admin Register new registration
 export const registerAdmin = async (req, res) => {
   try {
     const { name, email, phone, password, secretCode } = req.body;
@@ -108,10 +104,10 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-// Resend OTP option for resending otps
+// Resend OTP option for resending otp
 export const resendOtp = async (req, res) => {
   try {
-    const { email } = req.query; // since you're using GET
+    const { email } = req.query;
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });

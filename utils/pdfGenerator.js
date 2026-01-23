@@ -21,7 +21,7 @@ export const generateInvoicePDF = (invoice) => {
           const logoPath = path.resolve("images", "elevate-logoo.png");
           doc.image(logoPath, leftMargin, 40, { width: 65, fit: [65, 50] });
         } catch {
-          console.warn("⚠️ Logo not found, skipping...");
+          console.warn("Logo not found, skipping...");
         }
 
         doc.font("Helvetica-Bold").fontSize(16).fillColor("#1E3A8A")
