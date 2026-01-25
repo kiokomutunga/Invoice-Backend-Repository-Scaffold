@@ -40,10 +40,10 @@ router.delete("/:id", authenticateUser, requireAdmin, deleteInvoice);
 // Print invoice
 router.get("/:id/print", authenticateUser, printInvoice);
 
-// Email invoice
+
 router.post("/:id/email", authenticateUser, emailInvoice);
 
-// Share invoice
+
 router.get("/:id/share", authenticateUser, shareInvoice);
 
 export default router;
