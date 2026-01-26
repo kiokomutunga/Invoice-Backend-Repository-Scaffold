@@ -64,7 +64,7 @@ export const generateInvoicePDF = (invoice) => {
           .text(`Invoice No: ${invoice.invoiceNumber || "N/A"}`, metaX, sectionTop + 5);
         doc.text(`Date: ${formattedDate}`, metaX, sectionTop + 20);
 
-        return sectionTop + 85; // table starts here
+        return sectionTop + 85; // table.
       };
 
       //  TABLE HEADER 

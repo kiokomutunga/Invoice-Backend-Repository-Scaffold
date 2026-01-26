@@ -24,7 +24,7 @@ export const authenticateUser = async (req, res, next) => {
       return res.status(401).json({ message: "User not found" });
     }
 
-    req.user = user; // attach user to request
+    req.user = user;
     next();
   } catch (error) {
     return res.status(401).json({
@@ -33,7 +33,6 @@ export const authenticateUser = async (req, res, next) => {
   }
 };
 
-// Admin access to determine admins
 export const requireAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({
