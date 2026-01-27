@@ -104,7 +104,7 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-// Resend OTP option for resending otp
+// Resend Otp
 export const resendOtp = async (req, res) => {
   try {
     const { email } = req.query;
